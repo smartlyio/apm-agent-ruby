@@ -38,6 +38,11 @@ module ElasticAPM
         block.call
       end
       span_method :do_the_block_thing
+
+      def do_the_args_and_kwargs_thing(a, b:)
+        'ok args and kwargs'
+      end
+      span_method :do_the_args_and_kwargs_thing
     end
 
     context 'on class methods', :intercept do
@@ -78,6 +83,19 @@ module ElasticAPM
 
         expect(@intercepted.spans.length).to be 1
         expect(@intercepted.spans.last.name).to eq 'do_the_block_thing'
+      end
+
+      it 'wraps in a span with args and kwargs' do
+        thing = Thing.new
+
+        with_agent do
+          ElasticAPM.with_transaction do
+            thing.do_the_args_and_kwargs_thing 1, b: 2
+          end
+        end
+
+        expect(@intercepted.spans.length).to be 1
+        expect(@intercepted.spans.last.name).to eq 'do_the_args_and_kwargs_thing'
       end
     end
   end

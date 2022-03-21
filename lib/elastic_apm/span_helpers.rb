@@ -37,13 +37,13 @@ module ElasticAPM
         type ||= Span::DEFAULT_TYPE
 
         klass.prepend(Module.new do
-          define_method(method) do |*args, &block|
+          define_method(method) do |*args, **kwargs, &block|
             unless ElasticAPM.current_transaction
-              return super(*args, &block)
+              return super(*args, **kwargs, &block)
             end
 
             ElasticAPM.with_span name.to_s, type.to_s do
-              super(*args, &block)
+              super(*args, **kwargs, &block)
             end
           end
         end)
